@@ -19,3 +19,8 @@ docker exec -it php bash
 composer create-project laravel/laravel hello
 
 http://hello.loc:8080/ 
+
+### Работа с Laravel
+docker exec -it php bash
+cd hello
+php artisan migrate

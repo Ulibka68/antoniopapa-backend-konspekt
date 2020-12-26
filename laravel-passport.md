@@ -8,19 +8,14 @@ https://laravel.com/docs/7.x/passport#installation
 
 composer require laravel/passport "~9.0"  
 php artisan migrate  
-php artisan passport:install --uuids
-php artisan passport:install
-php artisan passport:keys
 
-After running the passport:install command, add the Laravel\Passport\HasApiTokens trait to your App\User model
-
-class User extends Authenticatable
-{
-use HasApiTokens, Notifiable;
-}
-
-https://www.positronx.io/laravel-rest-api-with-passport-authentication-tutorial/
-
-php artisan key:generate  
+composer require laravel/passport
 php artisan migrate
 php artisan passport:install
+
+### Deploying Passport
+php artisan passport:keys
+
+### Работает с паспортом
+List all registered routes  
+php artisan route:list
