@@ -1,0 +1,66 @@
+# Файл docker-compose должен начинаться с указания версии.
+version: '3'
+
+# Сети
+networks:
+  internal:
+
+# Ниже список наших сервисов (контейнеров). NGINX, PHP, MySQL, phpMyAdmin
+services:
+  nginx:
+    # Какую версию образа nginx из официального хранилища DockerHub используем
+    image: nginx:stable-alpine
+    container_name: nginx
+    # Ниже прокидываем порты. NGINX в контейнере работает на дефолтном 80, а мы возьмем 8000
+    ports:
+      - "8080:80"
+    # Монтируем директории, слева директории на основной системе, справа - куда они монтируются в контейнере
+    volumes:
+      - ./sites:/var/www
+      - ./config/nginx:/etc/nginx/conf.d
+      - ./data/logs:/var/log/nginx/
+    # Зависимости
+    depends_on:
+      - php
+      - mysql
+    networks:
+      - internal
+  php:
+    build:
+      context: ./config/php
+      dockerfile: Dockerfile.7.4
+    container_name: php
+    volumes:
+      - ./sites:/var/www
+      - ./config/php/php.ini:/usr/local/etc/php/php.ini
+    environment:
+      XDEBUG_CONFIG: "remote_host=host.docker.internal remote_enable=1"
+      PHP_IDE_CONFIG: "serverName=Docker"
+    ports:
+      - "9000:9000"
+    networks:
+      - internal
+
+  mysql:
+    image: mysql:8.0.22
+    container_name: mysql
+    restart: unless-stopped
+    command: --default-authentication-plugin=mysql_native_password
+    # command: --innodb_use_native_aio=0
+    ports:
+      - "33066:3306"
+    volumes:
+      - ./data/mysql:/var/lib/mysql
+      - ./data/mysql-log:/var/log/mysql
+      - ./config/mysql/conf:/etc/mysql
+    # Задаем пароль для root пользователя
+    # MYSQL_DATABASE: This variable allows you to specify the name of a database to be created on image startup. If a user name and a password are supplied with
+    environment:
+      MYSQL_DATABASE: laravel
+      MYSQL_USER: root
+      MYSQL_PASSWORD: root
+      MYSQL_ROOT_PASSWORD: root
+
+    networks:
+      - internal
+
